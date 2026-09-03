@@ -1,5 +1,6 @@
 <template>
   <div class="todo-container">
+    <div v-if="lastError" class="error-banner">Error: {{ lastError }}</div>
     <h1>Vue & MongoDB Todo List</h1>
 
     <form @submit.prevent="addTodo" class="todo-form">
@@ -37,6 +38,7 @@ const API_URL = (import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL : '
 const todos = ref<Todo[]>([]);
 const newTodoTitle = ref<string>('');
 const isSubmitting = ref(false);
+const lastError = ref<string | null>(null);
 
 const fetchTodos = async () => {
   try {
@@ -44,6 +46,7 @@ const fetchTodos = async () => {
     todos.value = await response.json();
   } catch (error) {
     console.error('Error fetching todos:', error);
+    lastError.value = String(error);
   }
 };
 
@@ -70,7 +73,7 @@ const addTodo = async () => {
   } catch (error) {
     console.error('Error adding todo:', error);
     alert('Network error while adding todo. Check your API URL and CORS.');
-  } finally {
+  try {
     isSubmitting.value = false;
   }
 };
@@ -81,16 +84,16 @@ const deleteTodo = async (id: string) => {
     if (response.ok) {
       todos.value = todos.value.filter(todo => todo._id !== id);
     }
-  } catch (error) {
-    console.error('Error deleting todo:', error);
-  }
-};
-
-onMounted(fetchTodos);
+    } else {
+      const text = await response.text();
+      console.error('Add failed:', response.status, text);
+      lastError.value = `Add failed: ${response.status} ${text}`;
+      alert('Failed to add todo. Please try again.');
+    }
 </script>
 
-<style scoped>
-.todo-container {
+    lastError.value = String(error);
+    alert('Network error while adding todo. Check your API URL and CORS.');
   max-width: 400px;
   margin: 50px auto;
   font-family: Arial, sans-serif;
@@ -135,5 +138,15 @@ onMounted(fetchTodos);
 .empty-msg {
   color: #666;
   font-style: italic;
+}
+.error-banner {
+  background: #ffdddd;
+  color: #800;
+  padding: 8px;
+  margin-bottom: 12px;
+  border: 1px solid #f5c2c2;
+  border-radius: 4px;
+  font-size: 14px;
+  word-break: break-word;
 }
 </style>
