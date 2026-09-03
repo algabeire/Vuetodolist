@@ -34,7 +34,7 @@ interface Todo {
   completed: boolean;
 }
 
-const API_URL = (import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL : 'http://192.168.1.18:5000') + '/api/todos';
+const API_URL = (import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL : 'http://localhost:5000') + '/api/todos';
 const todos = ref<Todo[]>([]);
 const newTodoTitle = ref<string>('');
 const isSubmitting = ref(false);
