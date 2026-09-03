@@ -32,7 +32,7 @@ interface Todo {
   completed: boolean;
 }
 
-const API_URL = 'http://localhost:5000/api/todos';
+const API_URL = 'http://192.168.1';
 const todos = ref<Todo[]>([]);
 const newTodoTitle = ref<string>('');
 
