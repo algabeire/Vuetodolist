@@ -2,7 +2,6 @@
   <div class="todo-container">
     <h1>Vue & MongoDB Todo List</h1>
 
-    <!-- Form to Add Todo -->
     <form @submit.prevent="addTodo" class="todo-form">
       <input 
         v-model="newTodoTitle" 
@@ -13,7 +12,6 @@
       <button type="submit" id="add-todo">+</button>
     </form>
 
-    <!-- Todo List Items -->
     <ul class="todo-list">
       <li v-for="todo in todos" :key="todo._id" class="todo-item">
         <span>{{ todo.title }}</span>
@@ -22,7 +20,6 @@
     </ul>
     
     <p v-if="todos.length === 0" class="empty-msg">No tasks left! 🎉</p>
-    <p v-if="errorMessage" class="error-msg">{{ errorMessage }}</p>
   </div>
 </template>
 
@@ -35,24 +32,15 @@ interface Todo {
   completed: boolean;
 }
 
-const API_URL = (import.meta.env.VITE_API_URL as string) || 'http://localhost:5000/api/todos';
+const API_URL = 'http://localhost:5000/api/todos';
 const todos = ref<Todo[]>([]);
 const newTodoTitle = ref<string>('');
-const errorMessage = ref<string>('');
 
 const fetchTodos = async () => {
-  errorMessage.value = '';
   try {
     const response = await fetch(API_URL);
-    if (!response.ok) {
-      const text = await response.text();
-      errorMessage.value = `Fetch error ${response.status}: ${text}`;
-      console.error(errorMessage.value);
-      return;
-    }
     todos.value = await response.json();
   } catch (error) {
-    errorMessage.value = String(error);
     console.error('Error fetching todos:', error);
   }
 };
@@ -71,14 +59,8 @@ const addTodo = async () => {
       const savedTodo: Todo = await response.json();
       todos.value.push(savedTodo);
       newTodoTitle.value = '';
-      errorMessage.value = '';
-    } else {
-      const text = await response.text();
-      errorMessage.value = `Add error ${response.status}: ${text}`;
-      console.error(errorMessage.value);
     }
   } catch (error) {
-    errorMessage.value = String(error);
     console.error('Error adding todo:', error);
   }
 };
@@ -143,9 +125,5 @@ onMounted(fetchTodos);
 .empty-msg {
   color: #666;
   font-style: italic;
-}
-.error-msg {
-  color: #b00020;
-  margin-top: 10px;
 }
 </style>
