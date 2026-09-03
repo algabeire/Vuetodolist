@@ -8,8 +8,9 @@
         type="text" 
         placeholder="Enter Todo" 
         id="input-todo"
+        :disabled="isSubmitting"
       />
-      <button type="submit" id="add-todo">+</button>
+      <button type="submit" id="add-todo" :disabled="isSubmitting">{{ isSubmitting ? '...' : '+' }}</button>
     </form>
 
     <ul class="todo-list">
@@ -35,6 +36,7 @@ interface Todo {
 const API_URL = (import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL : 'http://localhost:5000') + '/api/todos';
 const todos = ref<Todo[]>([]);
 const newTodoTitle = ref<string>('');
+const isSubmitting = ref(false);
 
 const fetchTodos = async () => {
   try {
@@ -47,6 +49,7 @@ const fetchTodos = async () => {
 
 const addTodo = async () => {
   if (!newTodoTitle.value.trim()) return;
+  isSubmitting.value = true;
 
   try {
     const response = await fetch(API_URL, {
@@ -54,14 +57,21 @@ const addTodo = async () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ title: newTodoTitle.value })
     });
-    
+
     if (response.ok) {
       const savedTodo: Todo = await response.json();
       todos.value.push(savedTodo);
       newTodoTitle.value = '';
+    } else {
+      const text = await response.text();
+      console.error('Add failed:', response.status, text);
+      alert('Failed to add todo. Please try again.');
     }
   } catch (error) {
     console.error('Error adding todo:', error);
+    alert('Network error while adding todo. Check your API URL and CORS.');
+  } finally {
+    isSubmitting.value = false;
   }
 };
 
